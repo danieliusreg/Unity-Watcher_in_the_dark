@@ -111,7 +111,8 @@ public class GraveDigging : MonoBehaviour
         // **Paleidžiam particle efektą**
         if (digEffectPrefab != null)
         {
-            GameObject effect = Instantiate(digEffectPrefab, position, Quaternion.identity);
+            Vector3 effectPosition = position + Vector3.up * 0.5f; // Pakelia efektą šiek tiek aukščiau DigSpot
+            GameObject effect = Instantiate(digEffectPrefab, effectPosition, Quaternion.Euler(-90, 0, 0));
             Destroy(effect, 2f); // Po 2 sekundžių sunaikiname efektą
         }
 
@@ -212,5 +213,16 @@ public class GraveDigging : MonoBehaviour
         }
 
         Debug.Log("Terrain atstatytas!");
+    }
+
+    // ŠIUOS METODUS DĖK ČIA, PO ResetTerrain()
+    void OnDisable()
+    {
+        ResetTerrain(); // Atstato terrainą prieš išjungiant skriptą (arba išeinant iš Play Mode)
+    }
+
+    void OnApplicationQuit()
+    {
+        ResetTerrain(); // Papildomas saugiklis, jei Unity nepašaukia OnDisable
     }
 }
