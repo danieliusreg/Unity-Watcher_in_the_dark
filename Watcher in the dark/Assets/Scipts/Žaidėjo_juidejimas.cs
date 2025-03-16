@@ -4,17 +4,16 @@ using UnityEngine.UI;
 public class FirstPersonMovement : MonoBehaviour
 {
     public CharacterController controller;
-    public float speed = 5f;
-    public float sprintSpeed = 8f; // Reguliuojamas sprinto greitis
-    public float crouchSpeed = 2f; // Reguliuojamas atsitūpimo greitis
+    public float walkSpeed = 5f;
+    public float sprintSpeed = 8f;
+    public float crouchSpeed = 2f;
     public float gravity = 9.81f;
-    
-    public float sprintDuration = 3f; // Kiek ilgai galima sprintinti
-    public float sprintRechargeRate = 1f; // Per kiek laiko atsistato sprintas
-    public float sprintRechargeDelay = 2f; // Užlaikymas prieš pradėdamas krautis sprintas
-    
+
+    public float sprintDuration = 3f;
+    public float sprintRechargeRate = 1f;
+    public float sprintRechargeDelay = 2f;
+
     private float currentSprintTime;
-    private bool isSprinting;
     private float sprintCooldownTimer = 0f;
     
     private Vector3 velocity;
@@ -28,9 +27,19 @@ public class FirstPersonMovement : MonoBehaviour
     public Transform playerCamera;
     public float crouchTransitionSpeed = 5f;
     private bool isCrouching = false;
-    
+
+    // Išsaugoti originalius greičius
+    private float originalWalkSpeed;
+    private float originalSprintSpeed;
+    private float originalCrouchSpeed;
+
     void Start()
     {
+        // Išsaugoti pradinius greičius
+        originalWalkSpeed = walkSpeed;
+        originalSprintSpeed = sprintSpeed;
+        originalCrouchSpeed = crouchSpeed;
+
         currentSprintTime = sprintDuration;
         if (sprintBar != null)
         {
@@ -38,7 +47,7 @@ public class FirstPersonMovement : MonoBehaviour
             sprintBar.value = sprintDuration;
         }
     }
-    
+
     void Update()
     {
         float moveX = Input.GetAxis("Horizontal");
@@ -46,8 +55,8 @@ public class FirstPersonMovement : MonoBehaviour
 
         bool sprintKey = Input.GetKey(KeyCode.LeftShift);
         bool crouchKey = Input.GetKey(KeyCode.LeftControl);
-        float currentSpeed = speed;
-        
+        float currentSpeed = walkSpeed;
+
         if (crouchKey)
         {
             currentSpeed = crouchSpeed;
@@ -57,12 +66,12 @@ public class FirstPersonMovement : MonoBehaviour
         {
             isCrouching = false;
         }
-        
+
         if (sprintKey && currentSprintTime > 0 && !isCrouching)
         {
             currentSpeed = sprintSpeed;
             currentSprintTime -= Time.deltaTime;
-            sprintCooldownTimer = 0f; // Nustatome užlaikymą į 0, kol sprintinam
+            sprintCooldownTimer = 0f; 
         }
         else if (!sprintKey && currentSprintTime < sprintDuration)
         {
@@ -75,10 +84,8 @@ public class FirstPersonMovement : MonoBehaviour
                 sprintCooldownTimer += Time.deltaTime;
             }
         }
-
         currentSprintTime = Mathf.Clamp(currentSprintTime, 0, sprintDuration);
 
-        // Atnaujinti sprinto juostą
         if (sprintBar != null)
         {
             sprintBar.value = currentSprintTime;
@@ -87,16 +94,38 @@ public class FirstPersonMovement : MonoBehaviour
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
         controller.Move(move * currentSpeed * Time.deltaTime);
 
-        // Gravitacija
+        if (controller.isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        }
         velocity.y -= gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        // Crouch transition
         float targetHeight = isCrouching ? crouchHeight : standingHeight;
         controller.height = Mathf.Lerp(controller.height, targetHeight, Time.deltaTime * crouchTransitionSpeed);
+        controller.center = new Vector3(0, controller.height / 2f, 0);
+
         if (playerCamera != null)
         {
-            playerCamera.localPosition = new Vector3(playerCamera.localPosition.x, controller.height - 0.1f, playerCamera.localPosition.z);
+            Vector3 camPos = playerCamera.localPosition;
+            camPos.y = Mathf.Lerp(camPos.y, targetHeight - 0.1f, Time.deltaTime * crouchTransitionSpeed);
+            playerCamera.localPosition = camPos;
         }
+    }
+
+    // 📌 Sumažina greitį patekus į purvo zoną
+    public void ApplySlow(float multiplier)
+    {
+        walkSpeed *= multiplier;
+        sprintSpeed *= multiplier;
+        crouchSpeed *= multiplier;
+    }
+
+    // 📌 Atkuria originalų greitį išėjus iš purvo zonos
+    public void RemoveSlow()
+    {
+        walkSpeed = originalWalkSpeed;
+        sprintSpeed = originalSprintSpeed;
+        crouchSpeed = originalCrouchSpeed;
     }
 }

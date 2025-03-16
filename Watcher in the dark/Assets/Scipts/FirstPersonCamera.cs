@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class FirstPersonCamera : MonoBehaviour
 {
-    public Transform player;
+    public Transform playerBody; // Žaidėjo kūnas, kuris suksis aplink vertikalę
     public float mouseSensitivity = 200f;
+
     private float cameraVerticalRotation = 0f;
 
     void Start()
@@ -14,6 +15,7 @@ public class FirstPersonCamera : MonoBehaviour
 
     void Update()
     {
+        // Gauti pelės judėjimą
         float inputX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float inputY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
@@ -23,6 +25,6 @@ public class FirstPersonCamera : MonoBehaviour
         transform.localRotation = Quaternion.Euler(cameraVerticalRotation, 0f, 0f);
 
         // Žaidėjo kūno sukimas
-        player.Rotate(Vector3.up * inputX);
+        playerBody.Rotate(Vector3.up * inputX);
     }
 }
