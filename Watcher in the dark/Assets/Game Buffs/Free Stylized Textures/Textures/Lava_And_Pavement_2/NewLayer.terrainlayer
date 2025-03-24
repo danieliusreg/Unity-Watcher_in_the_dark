@@ -6,18 +6,18 @@ TerrainLayer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Rocky_Dirt_2
-  m_DiffuseTexture: {fileID: 2800000, guid: 8b1d20f6985bdee43b8ac257fdfaf324, type: 3}
-  m_NormalMapTexture: {fileID: 2800000, guid: 15bfbda3d1778b8429155790dfbe98de, type: 3}
-  m_MaskMapTexture: {fileID: 2800000, guid: c1cc2d5e18d00364fb05a9531b26458f, type: 3}
-  m_TileSize: {x: 2, y: 2}
+  m_Name: NewLayer
+  m_DiffuseTexture: {fileID: 2800000, guid: 6de5a9bbae327f948882bb47bd8ba940, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: ea3640b0da7d1c44ebb45b7c9dd93e7a, type: 3}
+  m_MaskMapTexture: {fileID: 2800000, guid: 63838fe271f49654a8dfae79c490be39, type: 3}
+  m_TileSize: {x: 1.5, y: 1.5}
   m_TileOffset: {x: 0, y: 0}
   m_Specular: {r: 0, g: 0, b: 0, a: 0}
   m_Metallic: 0
   m_Smoothness: 0
-  m_NormalScale: 4
+  m_NormalScale: 3
   m_DiffuseRemapMin: {x: 0, y: 0, z: 0, w: 0}
-  m_DiffuseRemapMax: {x: 1, y: 1, z: 1, w: 1}
+  m_DiffuseRemapMax: {x: 1, y: 0.3478833, z: 0, w: 1}
   m_MaskMapRemapMin: {x: 0, y: 0, z: 0, w: 0}
   m_MaskMapRemapMax: {x: 1, y: 1, z: 1, w: 1}
   m_SmoothnessSource: 1
