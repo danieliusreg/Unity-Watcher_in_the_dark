@@ -3,18 +3,22 @@ using UnityEngine.AI;
 
 public class MudArea : MonoBehaviour
 {
-    public float slowMultiplier = 0.5f; // Sulėtėjimo koeficientas
+    public float slowMultiplier = 0.5f;
 
     private void OnTriggerEnter(Collider other)
     {
-        // Jei objektas turi NavMeshAgent (pvz., NPC), sulėtink jį
         NavMeshAgent agent = other.GetComponent<NavMeshAgent>();
         if (agent != null)
         {
-            agent.speed *= slowMultiplier;
+            // NPC: pritaikome sulėtinimą per RandomPatrol
+            RandomPatrol patrolScript = other.GetComponent<RandomPatrol>();
+            if (patrolScript != null)
+            {
+                patrolScript.ApplySlow(slowMultiplier);
+            }
         }
 
-        // Jei objektas yra žaidėjas, sulėtink jo judėjimą
+        // Jei žaidėjas
         FirstPersonMovement playerMovement = other.GetComponent<FirstPersonMovement>();
         if (playerMovement != null)
         {
@@ -24,14 +28,16 @@ public class MudArea : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        // Jei objektas turi NavMeshAgent, atkurk jo greitį
         NavMeshAgent agent = other.GetComponent<NavMeshAgent>();
         if (agent != null)
         {
-            agent.speed /= slowMultiplier;
+            RandomPatrol patrolScript = other.GetComponent<RandomPatrol>();
+            if (patrolScript != null)
+            {
+                patrolScript.RemoveSlow();
+            }
         }
 
-        // Jei objektas yra žaidėjas, atkurk jo greitį
         FirstPersonMovement playerMovement = other.GetComponent<FirstPersonMovement>();
         if (playerMovement != null)
         {

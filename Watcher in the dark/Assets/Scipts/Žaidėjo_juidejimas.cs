@@ -15,7 +15,7 @@ public class FirstPersonMovement : MonoBehaviour
 
     private float currentSprintTime;
     private float sprintCooldownTimer = 0f;
-    
+
     private Vector3 velocity;
 
     // UI
@@ -57,6 +57,8 @@ public class FirstPersonMovement : MonoBehaviour
         bool crouchKey = Input.GetKey(KeyCode.LeftControl);
         float currentSpeed = walkSpeed;
 
+        bool isMoving = Mathf.Abs(moveX) > 0.1f || Mathf.Abs(moveZ) > 0.1f;
+
         if (crouchKey)
         {
             currentSpeed = crouchSpeed;
@@ -67,23 +69,27 @@ public class FirstPersonMovement : MonoBehaviour
             isCrouching = false;
         }
 
-        if (sprintKey && currentSprintTime > 0 && !isCrouching)
+        if (sprintKey && currentSprintTime > 0 && !isCrouching && isMoving)
         {
             currentSpeed = sprintSpeed;
             currentSprintTime -= Time.deltaTime;
-            sprintCooldownTimer = 0f; 
+            sprintCooldownTimer = 0f;
         }
-        else if (!sprintKey && currentSprintTime < sprintDuration)
+        else
         {
-            if (sprintCooldownTimer >= sprintRechargeDelay)
+            if (currentSprintTime < sprintDuration)
             {
-                currentSprintTime += Time.deltaTime * sprintRechargeRate;
-            }
-            else
-            {
-                sprintCooldownTimer += Time.deltaTime;
+                if (sprintCooldownTimer >= sprintRechargeDelay)
+                {
+                    currentSprintTime += Time.deltaTime * sprintRechargeRate;
+                }
+                else
+                {
+                    sprintCooldownTimer += Time.deltaTime;
+                }
             }
         }
+
         currentSprintTime = Mathf.Clamp(currentSprintTime, 0, sprintDuration);
 
         if (sprintBar != null)

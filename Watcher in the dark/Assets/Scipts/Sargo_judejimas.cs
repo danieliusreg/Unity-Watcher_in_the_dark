@@ -4,25 +4,27 @@ using UnityEngine.AI;
 
 public class RandomPatrol : MonoBehaviour
 {
-    public Transform[] waypoints; // Patruliavimo taškai
-    public float waitTime = 2f;   // Kiek laiko laukti atvykus į tašką
-    public Transform player;      // Žaidėjo objektas
-    public float sightRange = 10f; // Matymo nuotolis
-    public float chaseSpeed = 5f;  // Greitis gaudant žaidėją
-    public float patrolSpeed = 2f; // Greitis patruliuojant
-    public LayerMask playerLayer; // Žaidėjo sluoksnis
-    public LayerMask obstacleMask; // Kliūčių sluoksnis
+    public Transform[] waypoints;
+    public float waitTime = 2f;
+    public Transform player;
+    public float sightRange = 10f;
+    public float chaseSpeed = 5f;
+    public float patrolSpeed = 2f;
+    public LayerMask playerLayer;
+    public LayerMask obstacleMask;
 
     private NavMeshAgent agent;
     private int currentWaypointIndex = -1;
-    private bool isWaiting = false; // Užtikrina, kad laukimas vyksta tik vieną kartą
-    private bool isChasing = false; // Ar sargas vejasi žaidėją?
-    private Vector3 lastSeenPosition; // Paskutinė vieta, kur matytas žaidėjas
+    private bool isWaiting = false;
+    private bool isChasing = false;
+    private Vector3 lastSeenPosition;
+
+    private float slowMultiplier = 1f; // Sulėtėjimo koeficientas (1f = normalus greitis)
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = patrolSpeed;
+        UpdateSpeed();
         MoveToNextWaypoint();
     }
 
@@ -34,10 +36,10 @@ public class RandomPatrol : MonoBehaviour
         }
         else if (isChasing)
         {
-            if (agent.remainingDistance < 0.5f) // Jei pasiekė paskutinę matytą žaidėjo vietą
+            if (agent.remainingDistance < 0.5f)
             {
                 isChasing = false;
-                agent.speed = patrolSpeed;
+                UpdateSpeed();
                 MoveToNextWaypoint();
             }
         }
@@ -78,12 +80,11 @@ public class RandomPatrol : MonoBehaviour
         Vector3 directionToPlayer = (player.position - transform.position).normalized;
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        // Patikrina, ar žaidėjas yra matymo ribose ir nėra paslėptas už kliūčių
         if (distanceToPlayer < sightRange)
         {
             if (!Physics.Raycast(transform.position, directionToPlayer, distanceToPlayer, obstacleMask))
             {
-                return true; // Žaidėjas matomas
+                return true;
             }
         }
         return false;
@@ -92,8 +93,27 @@ public class RandomPatrol : MonoBehaviour
     void StartChasing()
     {
         isChasing = true;
-        agent.speed = chaseSpeed;
         agent.destination = player.position;
-        lastSeenPosition = player.position; // Išsaugoma paskutinė matyta vieta
+        lastSeenPosition = player.position;
+        UpdateSpeed();
+    }
+
+    // === Nauja dalis: sulėtėjimo palaikymas ===
+
+    public void ApplySlow(float multiplier)
+    {
+        slowMultiplier = multiplier;
+        UpdateSpeed();
+    }
+
+    public void RemoveSlow()
+    {
+        slowMultiplier = 1f;
+        UpdateSpeed();
+    }
+
+    private void UpdateSpeed()
+    {
+        agent.speed = (isChasing ? chaseSpeed : patrolSpeed) * slowMultiplier;
     }
 }
