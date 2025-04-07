@@ -90,6 +90,15 @@ public class RandomPatrol : MonoBehaviour
         return false;
     }
 
+    void OnDrawGizmosSelected()
+    {
+        if (player == null)
+            return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, sightRange);
+    }
+
     void StartChasing()
     {
         isChasing = true;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 using Unity.AI.Navigation;
+using System.Collections;
 
 public class Kolona : MonoBehaviour
 {
@@ -9,31 +10,46 @@ public class Kolona : MonoBehaviour
     public NavMeshLink topLink1;
     public NavMeshLink topLink2;
     public NavMeshObstacle blocker;
+    public Svirtis svirtis;
 
-    [Header("Animacija")]
-    public float delayBetweenMoves = 5f; // kas kiek sekundžių keisti būseną
+    [Header("Nustatymai")]
+    public float delayToGoUp = 120f; // Kiek sekundžių laukti prieš pakylant (pvz. 2 minutės)
 
     private Animator animator;
-    private bool isUp = false; // Ar šiuo metu kolona išlindusi?
+    private bool isUp = true;
+    private bool isInCooldown = false;
 
     void Start()
     {
         animator = GetComponent<Animator>();
-        InvokeRepeating(nameof(SwitchState), 0f, delayBetweenMoves);
+        SetUpState(); // Pradinė būsena
     }
 
-    void SwitchState()
+    public void TriggerColumn()
     {
-        if (isUp)
-        {
-            animator.SetTrigger("KolonaDown");
-            isUp = false;
-        }
-        else
-        {
-            animator.SetTrigger("KolonaUp");
-            isUp = true;
-        }
+        if (!isUp || isInCooldown) return;
+
+        // Paleidžiam coroutine
+        StartCoroutine(ColumnDownThenUp());
+    }
+
+    private IEnumerator ColumnDownThenUp()
+    {
+        isInCooldown = true;
+
+        animator.SetTrigger("KolonaDown");
+        isUp = false;
+
+        // Palaukiam kol animacija pilnai nusileidžia (jei reikia, gali įdėti "yield return new WaitForSeconds()" prieš laukimą)
+        yield return new WaitForSeconds(delayToGoUp);
+
+        animator.SetTrigger("KolonaUp");
+        isUp = true;
+
+        // Laukiam kol pakils
+        yield return new WaitForSeconds(1f); // čia galima koreguoti pagal animaciją
+
+        isInCooldown = false;
     }
 
     // Šitos funkcijos kviečiamos iš animacijos eventų
@@ -52,6 +68,12 @@ public class Kolona : MonoBehaviour
             topLink2.enabled = true;
 
         Debug.Log("Kolona pakilo");
+
+        if (svirtis != null)
+        {
+            Debug.Log("Svirtis pakeliama!");
+            svirtis.LiftLever(); // čia iškviečiamas trigger
+        }
     }
 
     public void OnColumnDown()
@@ -69,5 +91,13 @@ public class Kolona : MonoBehaviour
             topLink2.enabled = false;
 
         Debug.Log("Kolona nusileido");
+
+        
+    }
+
+    private void SetUpState()
+    {
+        // Tik pasileidimo metu, kolona laikoma pakelta
+        OnColumnUp();
     }
 }
