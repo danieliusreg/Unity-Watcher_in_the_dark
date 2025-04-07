@@ -9,22 +9,29 @@ public class GraveDigging : MonoBehaviour
     public Camera mainCamera;
     public Terrain terrain;
     public GameObject keyPrefab;
-    public GameObject digEffectPrefab; // Particle efektas
+    public GameObject digEffectPrefab;
     public Transform digSpotsParent;
-    public Text keyListText; // UI Tekstas raktų sąrašui
-    public int maxDiggingSteps = 5;  
-    public float maxDepth = 0.2f;    
-    public int digRadius = 2;        
-    public float digAnimationDuration = 2.0f; 
+    public Text keyListText;
+
+    public Transform player; // <- Pridėtas žaidėjo transformas
+    public float digDistanceThreshold = 3f; // <- Maksimalus atstumas nuo žaidėjo iki spot'o
+
+    public int maxDiggingSteps = 5;
+    public float maxDepth = 0.2f;
+    public int digRadius = 2;
+    public float digAnimationDuration = 2.0f;
+
+    public AudioClip digSound;
+    private AudioSource audioSource;
 
     private List<Vector3> diggableSpots = new List<Vector3>();
     private Dictionary<Vector3, int> digProgress = new Dictionary<Vector3, int>();
     private Dictionary<Vector3, float> originalHeights = new Dictionary<Vector3, float>();
     private float[,] originalTerrainHeights;
     private bool isDigging = false;
-    private int maxKeys = 3; // Maksimalus raktų skaičius
+    private int maxKeys = 3;
     private HashSet<Vector3> keySpots = new HashSet<Vector3>();
-    private HashSet<Vector3> collectedKeys = new HashSet<Vector3>(); // Surinkti raktai  
+    private HashSet<Vector3> collectedKeys = new HashSet<Vector3>();
 
     void Start()
     {
@@ -41,11 +48,24 @@ public class GraveDigging : MonoBehaviour
 
         SaveInitialTerrainHeights();
         SelectRandomKeySpots();
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Automatiškai susiranda žaidėją pagal tag'ą "Player"
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null) player = playerObj.transform;
+        }
     }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !isDigging) 
+        if (Input.GetMouseButtonDown(0) && !isDigging)
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
@@ -58,6 +78,13 @@ public class GraveDigging : MonoBehaviour
                 {
                     if (Vector3.Distance(hitPoint, spot) < 1.5f)
                     {
+                        // Pridedam atstumo nuo žaidėjo tikrinimą
+                        if (player != null && Vector3.Distance(player.position, spot) > digDistanceThreshold)
+                        {
+                            Debug.Log("⛔ Per toli nuo kasimo vietos!");
+                            break;
+                        }
+
                         StartCoroutine(DigHoleSmoothly(spot));
                         break;
                     }
@@ -78,6 +105,11 @@ public class GraveDigging : MonoBehaviour
 
         isDigging = true;
 
+        if (digSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(digSound);
+        }
+
         digProgress[position]++;
 
         if (terrain == null)
@@ -96,7 +128,7 @@ public class GraveDigging : MonoBehaviour
         int xCenter = Mathf.RoundToInt((position.x - terrainPos.x) / terrainData.size.x * terrainWidth);
         int yCenter = Mathf.RoundToInt((position.z - terrainPos.z) / terrainData.size.z * terrainHeight);
 
-        int digSize = digRadius * 2 + 1; 
+        int digSize = digRadius * 2 + 1;
         float[,] heights = terrainData.GetHeights(xCenter - digRadius, yCenter - digRadius, digSize, digSize);
 
         float stepDepth = maxDepth / maxDiggingSteps;
@@ -164,7 +196,6 @@ public class GraveDigging : MonoBehaviour
 
     public void CollectKey(Vector3 position)
     {
-        // Suvienodiname `y` koordinatę, kad išvengtume neatitikimų
         position.y = 0f;
 
         bool alreadyCollected = collectedKeys.Any(collected =>
@@ -181,11 +212,8 @@ public class GraveDigging : MonoBehaviour
         collectedKeys.Add(position);
         Debug.Log("✅ Raktas įtrauktas į surinktus: " + position);
 
-        UpdateKeyListUI(); // Atnaujina UI tekstą
+        UpdateKeyListUI();
     }
-
-
-
 
     void SaveInitialTerrainHeights()
     {
@@ -199,7 +227,10 @@ public class GraveDigging : MonoBehaviour
             Vector3 position = child.position;
             diggableSpots.Add(position);
             digProgress[position] = 0;
-            originalHeights[position] = terrainData.GetHeights(Mathf.RoundToInt((position.x - terrainPos.x) / terrainData.size.x * terrainData.heightmapResolution), Mathf.RoundToInt((position.z - terrainPos.z) / terrainData.size.z * terrainData.heightmapResolution), 1, 1)[0, 0];
+            originalHeights[position] = terrainData.GetHeights(
+                Mathf.RoundToInt((position.x - terrainPos.x) / terrainData.size.x * terrainData.heightmapResolution),
+                Mathf.RoundToInt((position.z - terrainPos.z) / terrainData.size.z * terrainData.heightmapResolution),
+                1, 1)[0, 0];
         }
     }
 
@@ -224,7 +255,6 @@ public class GraveDigging : MonoBehaviour
         {
             string spotName = GetSpotName(spot);
 
-            // Naujas lyginimas, ignoruojant `y` koordinatę
             bool isCollected = collectedKeys.Any(collected =>
                 Mathf.Approximately(collected.x, spot.x) &&
                 Mathf.Approximately(collected.z, spot.z)
@@ -232,7 +262,7 @@ public class GraveDigging : MonoBehaviour
 
             if (isCollected)
             {
-                keyListText.text += "<color=#808080>- " + spotName + " (surinkta)</color>\n"; // Pilka spalva
+                keyListText.text += "<color=#808080>- " + spotName + " (surinkta)</color>\n";
                 Debug.Log("🔹 UI atnaujinta: " + spotName + " dabar pilkas.");
             }
             else
@@ -241,10 +271,6 @@ public class GraveDigging : MonoBehaviour
             }
         }
     }
-
-
-
-
 
     string GetSpotName(Vector3 position)
     {
@@ -258,9 +284,8 @@ public class GraveDigging : MonoBehaviour
         }
 
         Debug.LogWarning("⚠ Raktas nerastas pagal poziciją: " + position);
-        return position.ToString(); // Jei nepavyksta surasti, rodom poziciją
+        return position.ToString();
     }
-
 
     void ResetTerrain()
     {
@@ -288,14 +313,13 @@ public class GraveDigging : MonoBehaviour
         Debug.Log("Terrain atstatytas!");
     }
 
-    // ŠIUOS METODUS DĖK ČIA, PO ResetTerrain()
     void OnDisable()
     {
-        ResetTerrain(); // Atstato terrainą prieš išjungiant skriptą (arba išeinant iš Play Mode)
+        ResetTerrain();
     }
 
     void OnApplicationQuit()
     {
-        ResetTerrain(); // Papildomas saugiklis, jei Unity nepašaukia OnDisable
+        ResetTerrain();
     }
 }

@@ -3791,10 +3791,13 @@ MonoBehaviour:
   digEffectPrefab: {fileID: 1508783691138062764, guid: 21918ab951ded974ca29fd2797519ca2, type: 3}
   digSpotsParent: {fileID: 304569573}
   keyListText: {fileID: 574846006}
+  player: {fileID: 1975164054}
+  digDistanceThreshold: 3
   maxDiggingSteps: 5
   maxDepth: 0.001
   digRadius: 2
-  digAnimationDuration: 1
+  digAnimationDuration: 1.14
+  digSound: {fileID: 8300000, guid: eee435ba1a7aa524d810efda97a59d5e, type: 3}
 --- !u!1 &595136990 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 63f116c6db7243744a2f0c6f48903457, type: 3}
@@ -19127,7 +19130,7 @@ Transform:
   m_GameObject: {fileID: 1975164053}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 81.23, y: 6.9, z: 128.27}
+  m_LocalPosition: {x: 39.7, y: 6.9, z: 64.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
