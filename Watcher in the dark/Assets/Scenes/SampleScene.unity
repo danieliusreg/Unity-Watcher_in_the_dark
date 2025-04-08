@@ -20189,21 +20189,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waypoints:
-  - {fileID: 845189649}
+  - {fileID: 1992808516}
   - {fileID: 1768278556}
+  - {fileID: 1204693245}
+  - {fileID: 1301489022}
+  - {fileID: 1706166857}
+  - {fileID: 415874687}
+  - {fileID: 59089724}
+  - {fileID: 1225830966}
+  - {fileID: 1843336311}
+  - {fileID: 75702423}
+  - {fileID: 1814511577}
+  - {fileID: 1894420521}
+  - {fileID: 436083042}
+  - {fileID: 800652949}
+  - {fileID: 269584398}
+  - {fileID: 1644261266}
+  - {fileID: 845189649}
+  - {fileID: 382020218}
+  - {fileID: 862462294}
+  - {fileID: 2141577880}
+  - {fileID: 1801054987}
+  - {fileID: 279356869}
+  - {fileID: 942573036}
   waitTime: 2
   player: {fileID: 1975164054}
   sightRange: 10
   chaseSpeed: 5
   patrolSpeed: 2
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 0
   obstacleMask:
     serializedVersion: 2
     m_Bits: 0
   chaseMusic: {fileID: 8300000, guid: 3f0c9db78beaef041a1873d0ce26a2e6, type: 3}
   normalMusic: {fileID: 8300000, guid: ad364ae897907004ca6d49c56fe54695, type: 3}
+  fadeDuration: 1
 --- !u!54 &2082530159
 Rigidbody:
   m_ObjectHideFlags: 0

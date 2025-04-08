@@ -4,28 +4,29 @@ using UnityEngine.AI;
 
 public class RandomPatrol : MonoBehaviour
 {
+    [Header("Patruliavimas ir persekiojimas")]
     public Transform[] waypoints;
     public float waitTime = 2f;
     public Transform player;
     public float sightRange = 10f;
     public float chaseSpeed = 5f;
     public float patrolSpeed = 2f;
-    public LayerMask playerLayer;
     public LayerMask obstacleMask;
 
     [Header("Muzika")]
     public AudioClip chaseMusic;
     public AudioClip normalMusic;
+    public float fadeDuration = 2f;
     private AudioSource musicSource;
 
     private NavMeshAgent agent;
     private int currentWaypointIndex = -1;
     private bool isWaiting = false;
     private bool isChasing = false;
-    private Vector3 lastSeenPosition;
 
     private float slowMultiplier = 1f;
     private Coroutine timedChaseCoroutine;
+    private Coroutine chaseUpdateCoroutine;
 
     void Start()
     {
@@ -40,11 +41,11 @@ public class RandomPatrol : MonoBehaviour
             musicSource = gameObject.AddComponent<AudioSource>();
         }
 
-        // Paleidžiam ramų garso takelį
         if (normalMusic != null)
         {
             musicSource.clip = normalMusic;
             musicSource.loop = true;
+            musicSource.volume = 1f;
             musicSource.Play();
         }
     }
@@ -117,26 +118,24 @@ public class RandomPatrol : MonoBehaviour
 
         isChasing = true;
         agent.destination = player.position;
-        lastSeenPosition = player.position;
         UpdateSpeed();
     }
 
     public void StartTimedChase()
     {
         if (timedChaseCoroutine != null)
-        {
             StopCoroutine(timedChaseCoroutine);
-        }
+        timedChaseCoroutine = StartCoroutine(TimedChaseRoutine());
 
-        // Paleidžiam gaudymo muziką
+        if (chaseUpdateCoroutine != null)
+            StopCoroutine(chaseUpdateCoroutine);
+        chaseUpdateCoroutine = StartCoroutine(UpdateChaseDestination());
+
+        // Pradedam fade į persekiojimo muziką
         if (chaseMusic != null && musicSource != null)
         {
-            musicSource.clip = chaseMusic;
-            musicSource.loop = true;
-            musicSource.Play();
+            StartCoroutine(FadeToMusic(chaseMusic));
         }
-
-        timedChaseCoroutine = StartCoroutine(TimedChaseRoutine());
     }
 
     IEnumerator TimedChaseRoutine()
@@ -150,11 +149,6 @@ public class RandomPatrol : MonoBehaviour
 
         while (elapsedTime < chaseTime)
         {
-            if (player != null)
-            {
-                agent.destination = player.position;
-            }
-
             elapsedTime += Time.deltaTime;
             yield return null;
         }
@@ -165,13 +159,78 @@ public class RandomPatrol : MonoBehaviour
         MoveToNextWaypoint();
         timedChaseCoroutine = null;
 
+        if (chaseUpdateCoroutine != null)
+        {
+            StopCoroutine(chaseUpdateCoroutine);
+            chaseUpdateCoroutine = null;
+        }
+
         // Grįžtam prie ramios muzikos
         if (normalMusic != null && musicSource != null)
         {
-            musicSource.clip = normalMusic;
-            musicSource.loop = true;
-            musicSource.Play();
+            StartCoroutine(FadeToMusic(normalMusic));
         }
+    }
+
+    IEnumerator UpdateChaseDestination()
+    {
+        while (isChasing)
+        {
+            if (player != null)
+            {
+                agent.SetDestination(player.position);
+
+                float distance = Vector3.Distance(transform.position, player.position);
+                float waitTime;
+
+                if (distance < 5f)
+                {
+                    waitTime = 0.2f;
+                }
+                else if (distance < 15f)
+                {
+                    waitTime = 0.5f;
+                }
+                else
+                {
+                    waitTime = 1.0f;
+                }
+
+                yield return new WaitForSeconds(waitTime);
+            }
+            else
+            {
+                yield return new WaitForSeconds(1f);
+            }
+        }
+    }
+
+    IEnumerator FadeToMusic(AudioClip newClip)
+    {
+        if (musicSource.isPlaying)
+        {
+            // Fade out
+            float startVolume = musicSource.volume;
+            for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+            {
+                musicSource.volume = Mathf.Lerp(startVolume, 0f, t / fadeDuration);
+                yield return null;
+            }
+            musicSource.Stop();
+        }
+
+        // Change clip
+        musicSource.clip = newClip;
+        musicSource.Play();
+
+        // Fade in
+        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        {
+            musicSource.volume = Mathf.Lerp(0f, 1f, t / fadeDuration);
+            yield return null;
+        }
+
+        musicSource.volume = 1f;
     }
 
     public void ApplySlow(float multiplier)
@@ -193,9 +252,7 @@ public class RandomPatrol : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
-        if (player == null)
-            return;
-
+        if (player == null) return;
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, sightRange);
     }
