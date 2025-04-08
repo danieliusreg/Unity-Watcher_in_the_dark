@@ -66,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
       propertyPath: m_Name
-      value: Rakto_dllis_1 1 1
+      value: Rakto_dllis_1
       objectReference: {fileID: 0}
     - target: {fileID: 1974324175622713601, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -123,6 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfb81d46e5bfbda49855766dfc687b00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pickupSound: {fileID: 8300000, guid: 269a687d339848a4abaa9857ad4ce748, type: 3}
 --- !u!65 &2074172836333289303
 BoxCollider:
   m_ObjectHideFlags: 0

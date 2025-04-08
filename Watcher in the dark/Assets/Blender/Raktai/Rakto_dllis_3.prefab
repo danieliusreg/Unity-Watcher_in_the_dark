@@ -78,7 +78,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 474f0e87721a52b4b9616d6d748ac58c, type: 2}
     - target: {fileID: 919132149155446097, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
       propertyPath: m_Name
-      value: Rakto_dllis_3 1 1
+      value: Rakto_dllis_3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -111,6 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfb81d46e5bfbda49855766dfc687b00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pickupSound: {fileID: 8300000, guid: 269a687d339848a4abaa9857ad4ce748, type: 3}
 --- !u!65 &4044631085231176394
 BoxCollider:
   m_ObjectHideFlags: 0
