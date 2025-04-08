@@ -15,7 +15,6 @@ public class FirstPersonMovement : MonoBehaviour
 
     private float currentSprintTime;
     private float sprintCooldownTimer = 0f;
-
     private Vector3 velocity;
 
     // UI
@@ -28,14 +27,23 @@ public class FirstPersonMovement : MonoBehaviour
     public float crouchTransitionSpeed = 5f;
     private bool isCrouching = false;
 
-    // Išsaugoti originalius greičius
+    // Audio
+    public AudioSource footstepAudioSource;
+    public AudioClip footstepClip;
+    public float footstepDelay = 0.5f;
+    private float footstepTimer = 0f;
+
+    // Hearing
+    public LayerMask hearingMask;
+    public float soundRadius = 20f;
+
+    // Original speeds
     private float originalWalkSpeed;
     private float originalSprintSpeed;
     private float originalCrouchSpeed;
 
     void Start()
     {
-        // Išsaugoti pradinius greičius
         originalWalkSpeed = walkSpeed;
         originalSprintSpeed = sprintSpeed;
         originalCrouchSpeed = crouchSpeed;
@@ -46,7 +54,14 @@ public class FirstPersonMovement : MonoBehaviour
             sprintBar.maxValue = sprintDuration;
             sprintBar.value = sprintDuration;
         }
+
+        if (footstepAudioSource != null)
+        {
+            footstepAudioSource.loop = true;
+            footstepAudioSource.clip = footstepClip;
+        }
     }
+
 
     void Update()
     {
@@ -91,7 +106,6 @@ public class FirstPersonMovement : MonoBehaviour
         }
 
         currentSprintTime = Mathf.Clamp(currentSprintTime, 0, sprintDuration);
-
         if (sprintBar != null)
         {
             sprintBar.value = currentSprintTime;
@@ -117,9 +131,34 @@ public class FirstPersonMovement : MonoBehaviour
             camPos.y = Mathf.Lerp(camPos.y, targetHeight - 0.1f, Time.deltaTime * crouchTransitionSpeed);
             playerCamera.localPosition = camPos;
         }
+
+        // 🎧 Žingsnių garsas + pranešimas sargams
+        if (isMoving && controller.isGrounded)
+        {
+            footstepTimer -= Time.deltaTime;
+
+            if (!footstepAudioSource.isPlaying && footstepClip != null)
+            {
+                footstepAudioSource.Play();
+
+                // Pranešam sargams apie garsą
+                Collider[] guards = Physics.OverlapSphere(transform.position, soundRadius, hearingMask);
+                foreach (var guard in guards)
+                {
+                    guard.GetComponent<RandomPatrol>()?.OnFootstepHeard(transform.position);
+                }
+            }
+        }
+        else
+        {
+            if (footstepAudioSource.isPlaying)
+            {
+                footstepAudioSource.Stop();
+            }
+            footstepTimer = 0f;
+        }
     }
 
-    // 📌 Sumažina greitį patekus į purvo zoną
     public void ApplySlow(float multiplier)
     {
         walkSpeed *= multiplier;
@@ -127,7 +166,6 @@ public class FirstPersonMovement : MonoBehaviour
         crouchSpeed *= multiplier;
     }
 
-    // 📌 Atkuria originalų greitį išėjus iš purvo zonos
     public void RemoveSlow()
     {
         walkSpeed = originalWalkSpeed;
