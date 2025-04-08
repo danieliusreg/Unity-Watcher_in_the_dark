@@ -13,19 +13,40 @@ public class RandomPatrol : MonoBehaviour
     public LayerMask playerLayer;
     public LayerMask obstacleMask;
 
+    [Header("Muzika")]
+    public AudioClip chaseMusic;
+    public AudioClip normalMusic;
+    private AudioSource musicSource;
+
     private NavMeshAgent agent;
     private int currentWaypointIndex = -1;
     private bool isWaiting = false;
     private bool isChasing = false;
     private Vector3 lastSeenPosition;
 
-    private float slowMultiplier = 1f; // Sulėtėjimo koeficientas (1f = normalus greitis)
+    private float slowMultiplier = 1f;
+    private Coroutine timedChaseCoroutine;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         UpdateSpeed();
         MoveToNextWaypoint();
+
+        // Muzikos šaltinis
+        musicSource = GetComponent<AudioSource>();
+        if (musicSource == null)
+        {
+            musicSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Paleidžiam ramų garso takelį
+        if (normalMusic != null)
+        {
+            musicSource.clip = normalMusic;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
     }
 
     void Update()
@@ -34,7 +55,7 @@ public class RandomPatrol : MonoBehaviour
         {
             StartChasing();
         }
-        else if (isChasing)
+        else if (isChasing && timedChaseCoroutine == null)
         {
             if (agent.remainingDistance < 0.5f)
             {
@@ -43,7 +64,7 @@ public class RandomPatrol : MonoBehaviour
                 MoveToNextWaypoint();
             }
         }
-        else if (!agent.pathPending && agent.remainingDistance < 0.5f && !isWaiting)
+        else if (!agent.pathPending && agent.remainingDistance < 0.5f && !isWaiting && !isChasing)
         {
             StartCoroutine(WaitAndMove());
         }
@@ -90,24 +111,68 @@ public class RandomPatrol : MonoBehaviour
         return false;
     }
 
-    void OnDrawGizmosSelected()
-    {
-        if (player == null)
-            return;
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, sightRange);
-    }
-
     void StartChasing()
     {
+        if (timedChaseCoroutine != null) return;
+
         isChasing = true;
         agent.destination = player.position;
         lastSeenPosition = player.position;
         UpdateSpeed();
     }
 
-    // === Nauja dalis: sulėtėjimo palaikymas ===
+    public void StartTimedChase()
+    {
+        if (timedChaseCoroutine != null)
+        {
+            StopCoroutine(timedChaseCoroutine);
+        }
+
+        // Paleidžiam gaudymo muziką
+        if (chaseMusic != null && musicSource != null)
+        {
+            musicSource.clip = chaseMusic;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
+
+        timedChaseCoroutine = StartCoroutine(TimedChaseRoutine());
+    }
+
+    IEnumerator TimedChaseRoutine()
+    {
+        Debug.Log("🚨 Pradedam gaudymą 1 minutę!");
+        isChasing = true;
+        UpdateSpeed();
+
+        float chaseTime = 60f;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < chaseTime)
+        {
+            if (player != null)
+            {
+                agent.destination = player.position;
+            }
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        Debug.Log("✅ 1 minutė baigėsi, grįžtam į patruliavimą.");
+        isChasing = false;
+        UpdateSpeed();
+        MoveToNextWaypoint();
+        timedChaseCoroutine = null;
+
+        // Grįžtam prie ramios muzikos
+        if (normalMusic != null && musicSource != null)
+        {
+            musicSource.clip = normalMusic;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
+    }
 
     public void ApplySlow(float multiplier)
     {
@@ -124,5 +189,14 @@ public class RandomPatrol : MonoBehaviour
     private void UpdateSpeed()
     {
         agent.speed = (isChasing ? chaseSpeed : patrolSpeed) * slowMultiplier;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (player == null)
+            return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, sightRange);
     }
 }

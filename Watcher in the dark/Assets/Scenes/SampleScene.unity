@@ -4755,7 +4755,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6747227, y: 3, z: 4}
+  m_Size: {x: 0.6447227, y: 3, z: 3.6}
   m_Center: {x: -1.6626387, y: 1, z: 0}
 --- !u!65 &737273646
 BoxCollider:
@@ -4776,7 +4776,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6172606, y: 3, z: 4}
+  m_Size: {x: 0.5872606, y: 3, z: 3.6}
   m_Center: {x: 1.7363698, y: 1, z: 0}
 --- !u!65 &737273647
 BoxCollider:
@@ -4797,7 +4797,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.6163828, y: 3, z: 4}
+  m_Size: {x: 2.586383, y: 3, z: 3.6}
   m_Center: {x: 0.05007541, y: 1, z: 0}
 --- !u!1 &741094835
 GameObject:
@@ -19116,7 +19116,7 @@ GameObject:
   - component: {fileID: 1975164058}
   m_Layer: 0
   m_Name: "\u017Daid\u0117jas"
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -20202,6 +20202,8 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 0
+  chaseMusic: {fileID: 8300000, guid: 3f0c9db78beaef041a1873d0ce26a2e6, type: 3}
+  normalMusic: {fileID: 8300000, guid: ad364ae897907004ca6d49c56fe54695, type: 3}
 --- !u!54 &2082530159
 Rigidbody:
   m_ObjectHideFlags: 0
