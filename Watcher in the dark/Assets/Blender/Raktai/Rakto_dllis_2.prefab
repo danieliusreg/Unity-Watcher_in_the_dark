@@ -1,0 +1,142 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &5326867346086154076
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 35.095913
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.104837
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 60.793
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -6706411723319213431, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6706411723319213431, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6706411723319213431, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6706411723319213431, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: m_Name
+      value: Rakto_dllis_2 1 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1096484241149301426, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 474f0e87721a52b4b9616d6d748ac58c, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects:
+    - {fileID: 5464658711620024711, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+    - {fileID: 8821623529969584324, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+    - {fileID: 659896306493179743, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -3806906977202559399, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4101045781231743161}
+    - targetCorrespondingSourceObject: {fileID: -3806906977202559399, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8287589137612543910}
+  m_SourcePrefab: {fileID: 100100000, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+--- !u!1 &200396881702250757 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -3806906977202559399, guid: 49ab35defbb1f8e409b59aa0668a0af0, type: 3}
+  m_PrefabInstance: {fileID: 5326867346086154076}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4101045781231743161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200396881702250757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb81d46e5bfbda49855766dfc687b00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!65 &8287589137612543910
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200396881702250757}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 19.118084, y: 6.912637, z: 0.71487045}
+  m_Center: {x: -3.0446813, y: 0.3922027, z: -0.1038824}

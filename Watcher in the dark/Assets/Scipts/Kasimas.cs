@@ -8,41 +8,44 @@ public class GraveDigging : MonoBehaviour
 {
     public Camera mainCamera;
     public Terrain terrain;
-    public GameObject keyPrefab;
+    public Transform player;
+    public GameObject[] keyPartPrefabs; // <-- 3 raktų dalys
     public GameObject digEffectPrefab;
     public Transform digSpotsParent;
     public Text keyListText;
 
-    public Transform player; // <- Pridėtas žaidėjo transformas
-    public float digDistanceThreshold = 3f; // <- Maksimalus atstumas nuo žaidėjo iki spot'o
-
+    public float digDistanceThreshold = 3f;
     public int maxDiggingSteps = 5;
     public float maxDepth = 0.2f;
     public int digRadius = 2;
     public float digAnimationDuration = 2.0f;
-
     public AudioClip digSound;
-    private AudioSource audioSource;
 
+    private AudioSource audioSource;
     private List<Vector3> diggableSpots = new List<Vector3>();
     private Dictionary<Vector3, int> digProgress = new Dictionary<Vector3, int>();
     private Dictionary<Vector3, float> originalHeights = new Dictionary<Vector3, float>();
     private float[,] originalTerrainHeights;
     private bool isDigging = false;
     private int maxKeys = 3;
-    private HashSet<Vector3> keySpots = new HashSet<Vector3>();
+
+    private struct KeySpotInfo
+    {
+        public Vector3 position;
+        public GameObject prefab;
+    }
+
+    private List<KeySpotInfo> keySpotInfos = new List<KeySpotInfo>();
     private HashSet<Vector3> collectedKeys = new HashSet<Vector3>();
 
     void Start()
     {
         if (terrain == null)
-        {
             terrain = Terrain.activeTerrain;
-        }
 
         if (terrain == null)
         {
-            Debug.LogError("Terrain is not assigned and no active terrain found! Assign Terrain in Inspector.");
+            Debug.LogError("Terrain is not assigned and no active terrain found!");
             return;
         }
 
@@ -51,15 +54,13 @@ public class GraveDigging : MonoBehaviour
 
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
-        {
             audioSource = gameObject.AddComponent<AudioSource>();
-        }
 
-        // Automatiškai susiranda žaidėją pagal tag'ą "Player"
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null) player = playerObj.transform;
+            if (playerObj != null)
+                player = playerObj.transform;
         }
     }
 
@@ -69,7 +70,6 @@ public class GraveDigging : MonoBehaviour
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-
             if (Physics.Raycast(ray, out hit))
             {
                 Vector3 hitPoint = hit.point;
@@ -78,7 +78,6 @@ public class GraveDigging : MonoBehaviour
                 {
                     if (Vector3.Distance(hitPoint, spot) < 1.5f)
                     {
-                        // Pridedam atstumo nuo žaidėjo tikrinimą
                         if (player != null && Vector3.Distance(player.position, spot) > digDistanceThreshold)
                         {
                             Debug.Log("⛔ Per toli nuo kasimo vietos!");
@@ -93,35 +92,23 @@ public class GraveDigging : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.R))
-        {
             ResetTerrain();
-        }
     }
 
     IEnumerator DigHoleSmoothly(Vector3 position)
     {
-        if (!digProgress.ContainsKey(position)) yield break;
-        if (digProgress[position] >= maxDiggingSteps) yield break;
+        if (!digProgress.ContainsKey(position) || digProgress[position] >= maxDiggingSteps)
+            yield break;
 
         isDigging = true;
 
         if (digSound != null && audioSource != null)
-        {
             audioSource.PlayOneShot(digSound);
-        }
 
         digProgress[position]++;
 
-        if (terrain == null)
-        {
-            Debug.LogError("Terrain is missing! Make sure it is assigned.");
-            isDigging = false;
-            yield break;
-        }
-
         TerrainData terrainData = terrain.terrainData;
         Vector3 terrainPos = terrain.transform.position;
-
         int terrainWidth = terrainData.heightmapResolution;
         int terrainHeight = terrainData.heightmapResolution;
 
@@ -135,7 +122,6 @@ public class GraveDigging : MonoBehaviour
         float minAllowedHeight = originalHeights[position] - maxDepth;
 
         float elapsedTime = 0;
-        float animationTime = digAnimationDuration;
         float[,] startHeights = (float[,])heights.Clone();
         float[,] targetHeights = (float[,])heights.Clone();
 
@@ -154,10 +140,10 @@ public class GraveDigging : MonoBehaviour
             Destroy(effect, 2f);
         }
 
-        while (elapsedTime < animationTime)
+        while (elapsedTime < digAnimationDuration)
         {
             elapsedTime += Time.deltaTime;
-            float t = elapsedTime / animationTime;
+            float t = elapsedTime / digAnimationDuration;
 
             for (int i = 0; i < digSize; i++)
             {
@@ -173,25 +159,19 @@ public class GraveDigging : MonoBehaviour
 
         isDigging = false;
 
-        if (digProgress[position] >= maxDiggingSteps && keySpots.Contains(position))
+        if (digProgress[position] >= maxDiggingSteps)
         {
-            SpawnKey(position);
+            var info = keySpotInfos.FirstOrDefault(i => Vector3.Distance(i.position, position) < 0.1f);
+            if (info.prefab != null)
+                SpawnKeyPart(info);
         }
     }
 
-    void SpawnKey(Vector3 position)
+    void SpawnKeyPart(KeySpotInfo info)
     {
-        if (keyPrefab == null)
-        {
-            Debug.LogError("Key Prefab is missing! Assign it in the Inspector.");
-            return;
-        }
-
-        Vector3 keyPosition = position;
-        keyPosition.y += 0.2f;
-
-        Instantiate(keyPrefab, keyPosition, Quaternion.identity);
-        Debug.Log("Raktas atsirado ant DigSpot: " + position);
+        Vector3 keyPosition = info.position + Vector3.up * 0.2f;
+        Instantiate(info.prefab, keyPosition, Quaternion.identity);
+        Debug.Log("🧩 Raktų dalis atsirado: " + info.prefab.name);
     }
 
     public void CollectKey(Vector3 position)
@@ -205,21 +185,26 @@ public class GraveDigging : MonoBehaviour
 
         if (alreadyCollected)
         {
-            Debug.LogWarning("⚠ Raktas iš šios vietos jau buvo surinktas: " + position);
+            Debug.LogWarning("⚠ Raktų dalis jau surinkta: " + position);
             return;
         }
 
         collectedKeys.Add(position);
-        Debug.Log("✅ Raktas įtrauktas į surinktus: " + position);
+        Debug.Log("✅ Raktų dalis surinkta: " + position);
 
         UpdateKeyListUI();
+
+        if (collectedKeys.Count >= maxKeys)
+        {
+            Debug.Log("🏆 Surinktos visos raktų dalys!");
+            // Gali pridėti logiką vartams atidaryti ir pan.
+        }
     }
 
     void SaveInitialTerrainHeights()
     {
         TerrainData terrainData = terrain.terrainData;
         originalTerrainHeights = terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);
-
         Vector3 terrainPos = terrain.transform.position;
 
         foreach (Transform child in digSpotsParent)
@@ -236,8 +221,18 @@ public class GraveDigging : MonoBehaviour
 
     void SelectRandomKeySpots()
     {
-        keySpots = new HashSet<Vector3>(diggableSpots.OrderBy(x => Random.value).Take(maxKeys));
-        Debug.Log("Raktai bus šiose vietose:");
+        keySpotInfos.Clear();
+        var selectedSpots = diggableSpots.OrderBy(x => Random.value).Take(maxKeys).ToList();
+
+        for (int i = 0; i < selectedSpots.Count && i < keyPartPrefabs.Length; i++)
+        {
+            keySpotInfos.Add(new KeySpotInfo
+            {
+                position = selectedSpots[i],
+                prefab = keyPartPrefabs[i]
+            });
+        }
+
         UpdateKeyListUI();
     }
 
@@ -245,30 +240,23 @@ public class GraveDigging : MonoBehaviour
     {
         if (keyListText == null)
         {
-            Debug.LogError("❌ KeyListText UI nėra priskirtas! Įsitikink, kad jis yra Inspector'iuje.");
+            Debug.LogError("❌ KeyListText nėra priskirtas!");
             return;
         }
 
-        keyListText.text = "Raktai bus šiose vietose:\n";
-
-        foreach (var spot in keySpots)
+        keyListText.text = "Raktų dalys:\n";
+        foreach (var spotInfo in keySpotInfos)
         {
-            string spotName = GetSpotName(spot);
-
-            bool isCollected = collectedKeys.Any(collected =>
-                Mathf.Approximately(collected.x, spot.x) &&
-                Mathf.Approximately(collected.z, spot.z)
+            string spotName = GetSpotName(spotInfo.position);
+            bool isCollected = collectedKeys.Any(c =>
+                Mathf.Approximately(c.x, spotInfo.position.x) &&
+                Mathf.Approximately(c.z, spotInfo.position.z)
             );
 
             if (isCollected)
-            {
-                keyListText.text += "<color=#808080>- " + spotName + " (surinkta)</color>\n";
-                Debug.Log("🔹 UI atnaujinta: " + spotName + " dabar pilkas.");
-            }
+                keyListText.text += $"<color=#808080>- {spotName} (surinkta)</color>\n";
             else
-            {
-                keyListText.text += "- " + spotName + "\n";
-            }
+                keyListText.text += $"- {spotName}\n";
         }
     }
 
@@ -277,49 +265,22 @@ public class GraveDigging : MonoBehaviour
         foreach (Transform child in digSpotsParent)
         {
             if (Vector3.Distance(child.position, position) < 0.1f)
-            {
-                Debug.Log("🔎 Raktas rastas: " + child.name + " (pozicija: " + position + ")");
                 return child.name;
-            }
         }
-
-        Debug.LogWarning("⚠ Raktas nerastas pagal poziciją: " + position);
         return position.ToString();
     }
 
     void ResetTerrain()
     {
-        if (terrain == null)
-        {
-            Debug.LogError("Terrain is missing! Cannot reset.");
-            return;
-        }
+        if (terrain == null || originalTerrainHeights == null) return;
 
-        TerrainData terrainData = terrain.terrainData;
+        terrain.terrainData.SetHeights(0, 0, originalTerrainHeights);
+        foreach (Vector3 pos in diggableSpots)
+            digProgress[pos] = 0;
 
-        if (originalTerrainHeights == null)
-        {
-            Debug.LogError("Original terrain heights not found! Terrain cannot be reset.");
-            return;
-        }
-
-        terrainData.SetHeights(0, 0, originalTerrainHeights);
-
-        foreach (Vector3 position in diggableSpots)
-        {
-            digProgress[position] = 0;
-        }
-
-        Debug.Log("Terrain atstatytas!");
+        Debug.Log("🌱 Terrain atstatytas.");
     }
 
-    void OnDisable()
-    {
-        ResetTerrain();
-    }
-
-    void OnApplicationQuit()
-    {
-        ResetTerrain();
-    }
+    void OnDisable() => ResetTerrain();
+    void OnApplicationQuit() => ResetTerrain();
 }

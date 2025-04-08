@@ -11,30 +11,16 @@ public class Key : MonoBehaviour
 
     void OnMouseDown()
     {
-        Debug.Log("Raktas paimtas: " + gameObject.name);
+        Debug.Log("🔑 Raktų dalis paimta: " + gameObject.name);
 
-        // Raktas įtraukiamas į sąrašą
         GraveDigging graveDigging = Object.FindFirstObjectByType<GraveDigging>();
         if (graveDigging != null)
-        {
             graveDigging.CollectKey(keyPosition);
-        }
-        else
-        {
-            Debug.LogError("GraveDigging scriptas NERASTAS!");
-        }
 
-        // Paleidžiam sargo gaudymo logiką
         RandomPatrol patrol = Object.FindFirstObjectByType<RandomPatrol>();
         if (patrol != null)
-        {
             patrol.StartTimedChase();
-        }
-        else
-        {
-            Debug.LogError("RandomPatrol scriptas nerastas!");
-        }
 
-        Destroy(gameObject); // Raktas dingsta
+        Destroy(gameObject);
     }
 }
