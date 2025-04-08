@@ -144,7 +144,7 @@ public class RandomPatrol : MonoBehaviour
         isChasing = true;
         UpdateSpeed();
 
-        float chaseTime = 60f;
+        float chaseTime = 10f;
         float elapsedTime = 0f;
 
         while (elapsedTime < chaseTime)
@@ -163,6 +163,7 @@ public class RandomPatrol : MonoBehaviour
         {
             StopCoroutine(chaseUpdateCoroutine);
             chaseUpdateCoroutine = null;
+            sightRange += 5;
         }
 
         // Grįžtam prie ramios muzikos
