@@ -38,7 +38,7 @@ public class Key : MonoBehaviour
         // Paleidžiam patrol'ą
         RandomPatrol patrol = Object.FindFirstObjectByType<RandomPatrol>();
         if (patrol != null)
-            patrol.StartTimedChase();
+            patrol.TriggerAlert();
 
         // Palaukiam, kol garsas nuskambės, tada sunaikinam objektą
         StartCoroutine(DestroyAfterSound());
