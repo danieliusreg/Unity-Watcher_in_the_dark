@@ -1,30 +1,53 @@
 using UnityEngine;
+using System.Collections;
 
 public class Key : MonoBehaviour
 {
-    private Vector3 keyPosition; 
+    private Vector3 keyPosition;
+
+    public AudioClip pickupSound; // <- Garso failas
+    private AudioSource audioSource;
+
+    private bool isPickedUp = false;
 
     void Start()
     {
-        keyPosition = transform.position; 
+        keyPosition = transform.position;
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     void OnMouseDown()
     {
-        Debug.Log("Raktas paimtas: " + gameObject.name);
+        if (isPickedUp) return; // Kad nesuveiktų kelis kartus
+        isPickedUp = true;
 
-        // Pataisome pasenusį metodą
+        Debug.Log("🔑 Raktų dalis paimta: " + gameObject.name);
+
+        // Paleidžiam garsą
+        if (pickupSound != null && audioSource != null)
+            audioSource.PlayOneShot(pickupSound);
+
+        // Pranešam GraveDigging
         GraveDigging graveDigging = Object.FindFirstObjectByType<GraveDigging>();
         if (graveDigging != null)
-        {
-            Debug.Log("GraveDigging scriptas rastas, kviečiame CollectKey.");
-            graveDigging.CollectKey(keyPosition); // Praneša, kad raktas paimtas
-        }
-        else
-        {
-            Debug.LogError("GraveDigging scriptas NERASTAS! Įsitikink, kad jis yra scenoje.");
-        }
+            graveDigging.CollectKey(keyPosition);
 
-        Destroy(gameObject); // Raktas dingsta
+        // Paleidžiam patrol'ą
+        RandomPatrol patrol = Object.FindFirstObjectByType<RandomPatrol>();
+        if (patrol != null)
+            patrol.TriggerAlert();
+
+        // Palaukiam, kol garsas nuskambės, tada sunaikinam objektą
+        StartCoroutine(DestroyAfterSound());
+    }
+
+    IEnumerator DestroyAfterSound()
+    {
+        if (pickupSound != null)
+            yield return new WaitForSeconds(pickupSound.length);
+        Destroy(gameObject);
     }
 }
